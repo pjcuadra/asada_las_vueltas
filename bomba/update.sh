@@ -12,9 +12,15 @@ sed -i "s/@SCRIPT_PATH@/$SCRIPT_PATH/g" control-bomba.service
 # Copy the modified staging file to the systemd directory
 sudo cp control-bomba.service /etc/systemd/system/
 
-# Reload systemd and enable the service
-sudo systemctl daemon-reload
-sudo systemctl enable control-bomba.service
-
-# Start the service
-sudo systemctl start control-bomba.service
+# Check if reload is needed and reload if necessary
+if sudo systemctl is-enabled --quiet control-bomba.service && \
+   [[ $(systemctl show control-bomba.service -p NeedDaemonReload --value) == yes ]]; then
+    echo "Reloading systemd daemon..."
+    sudo systemctl daemon-reload
+    echo "Restarting control-bomba service..."
+    sudo systemctl restart control-bomba.service
+else
+    echo "Enabling and starting control-bomba service..."
+    sudo systemctl enable control-bomba.service
+    sudo systemctl start control-bomba.service
+fi
