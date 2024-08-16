@@ -5,8 +5,8 @@ After=network.target
 [Service]
 Type=simple
 Restart=always
-User=your_user  # Replace with the user you want to run the script as
-ExecStart=/usr/bin/python3 /path/to/your/script.py
+User=@USER@
+ExecStart=/usr/bin/python3 @SCRIPT_PATH@
 
 [Install]
 WantedBy=multi-user.target
