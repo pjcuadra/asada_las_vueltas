@@ -1,2 +1,1 @@
-opentelemetry-sdk
-opentelemetry-exporter-otlp-proto-grpc
+paho-mqtt

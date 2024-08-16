@@ -1,0 +1,12 @@
+[Unit]
+Description=Water Bomb Pressure Monitor
+After=network.target
+
+[Service]
+Type=simple
+Restart=always
+User=your_user  # Replace with the user you want to run the script as
+ExecStart=/usr/bin/python3 /path/to/your/script.py
+
+[Install]
+WantedBy=multi-user.target

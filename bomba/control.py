@@ -1,24 +1,20 @@
 import time
 import random
-from opentelemetry import metrics
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.resources import Resource
-from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+import paho.mqtt.client as mqtt
+import os
 
+# MQTT Configuration from Environment Variables
+broker_address = os.environ.get('MQTT_BROKER_ADDRESS')
+broker_port = int(os.environ.get('MQTT_BROKER_PORT', 1883))  # Default to 1883 if not set
+topic = "sensors/bomb/water_pressure"
 
-# Set up OpenTelemetry metrics
-resource = Resource.create(attributes={"service.name": "water_bomb_monitor"})
-provider = MeterProvider(resource=resource)
-metrics.set_meter_provider(provider)
-meter = metrics.get_meter(__name__)
-exporter = OTLPMetricExporter(endpoint="http://localhost:4317", insecure=True)  # Adjust endpoint if needed
+# Check if environment variables are set
+if not broker_address:
+    raise ValueError("MQTT_BROKER_ADDRESS environment variable is not set")
 
-# Create a gauge to record pressure
-pressure_gauge = meter.create_observable_gauge(
-    "water_bomb_pressure",
-    unit="psi",
-    description="Pressure of the water bomb",
-)
+# Connect to MQTT Broker
+client = mqtt.Client()
+client.connect(broker_address, broker_port)
 
 def get_water_bomb_pressure():
     """Simulates getting pressure from a sensor (replace with actual sensor reading)"""
@@ -27,11 +23,10 @@ def get_water_bomb_pressure():
 
 while True:
     pressure = get_water_bomb_pressure()
-    pressure_gauge.record(pressure)
+    payload = f"{{'value': {pressure}, 'timestamp': {int(time.time())}, 'sensor_id': 'bomb-water-pressure'}}"
+    client.publish(topic, payload)
     print(f"Published pressure: {pressure} psi")
-
-    # Export metrics to the collector
-    provider.get_meter("water_bomb_monitor").collect()
-    exporter.export(provider.get_meter("water_bomb_monitor").collect())
-
     time.sleep(60)  # Wait for 1 minute
+
+# Disconnect from MQTT Broker (This line will never be reached due to the endless loop)
+client.disconnect()
