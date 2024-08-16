@@ -1,0 +1,38 @@
+version: '3'
+services:
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"
+   # gRPC receiver
+      - "4318:4318"   # HTTP receiver
+
+  tempo:
+    image: grafana/tempo
+    volumes:
+      - ./tempo-data:/tmp/tempo-data
+
+  grafana:
+    image: grafana/grafana
+    depends_on:
+      - tempo
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana-data:/var/lib/grafana
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-tempo-datasource
+
+  config-db:
+    image: postgres:latest
+    environment:
+      - POSTGRES_USER=config_user
+      - POSTGRES_PASSWORD=your_strong_password
+      - POSTGRES_DB=config_db
+    volumes:
+      - ./config-db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
