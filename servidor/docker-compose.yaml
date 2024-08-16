@@ -1,30 +1,32 @@
 version: '3'
 services:
-  otel-collector:
-    image: otel/opentelemetry-collector-contrib
-    command: ["--config=/etc/otel-collector-config.yaml"]
-    volumes:
-      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+  mqtt-broker:
+    image: eclipse-mosquitto
     ports:
-      - "4317:4317"
-   # gRPC receiver
-      - "4318:4318"   # HTTP receiver
-
-  tempo:
-    image: grafana/tempo
+      - "1883:1883"   # Default MQTT port
     volumes:
-      - ./tempo-data:/tmp/tempo-data
+      - ./mosquitto-data:/mosquitto/data
+      - ./mosquitto-config:/mosquitto/config
+
+  influxdb:
+    image: influxdb:latest
+    environment:
+      - INFLUXDB_DB=telemetry_db
+      - INFLUXDB_USER=telemetry_user
+      - INFLUXDB_PASSWORD=your_strong_password
+    volumes:
+      - ./influxdb-data:/var/lib/influxdb2
+    ports:
+      - "8086:8086"  # InfluxDB HTTP API port
 
   grafana:
     image: grafana/grafana
     depends_on:
-      - tempo
+      - influxdb
     ports:
       - "3000:3000"
     volumes:
       - ./grafana-data:/var/lib/grafana
-    environment:
-      - GF_INSTALL_PLUGINS=grafana-tempo-datasource
 
   config-db:
     image: postgres:latest
