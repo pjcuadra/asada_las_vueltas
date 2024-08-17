@@ -157,7 +157,7 @@ def on_message(client, userdata, msg):
 def wait_next_iteration():
     global SLEEP_TIME
     for i in range(SLEEP_TIME):
-        time.sleep(SLEEP_TIME)
+        time.sleep(1)
         if bomba.started:
             break
 
