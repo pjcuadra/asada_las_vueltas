@@ -147,17 +147,18 @@ def on_message(client, userdata, msg):
     if payload == "ON":
         bomba.start()
         SLEEP_TIME = BOMB_ON_SLEEP_TIME
-        print("Digital signal turned ON")
+        print(f"{datetime.now()} Digital signal turned ON")
     elif payload == "OFF":
         bomba.stop()
         SLEEP_TIME = BOMB_OFF_SLEEP_TIME
-        print("Digital signal turned OFF")
+        print(f"{datetime.now()} Digital signal turned OFF")
 
 
 def wait_next_iteration():
     global SLEEP_TIME
     for i in range(SLEEP_TIME):
         time.sleep(1)
+        print(f"{datetime.now()} Sleeping")
         if bomba.started:
             break
 
