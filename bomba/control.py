@@ -181,15 +181,15 @@ client.loop_start()
 
 while True:
     pressure = bomba.get_pressure_psi()
-    payload = f'{{"value": {pressure}, "timestamp": {int(time.time())}, "sensor_id": "bomb-water-pressure"}}'
+    payload = f'{{"value": {float(pressure)}, "timestamp": {int(time.time())}, "sensor_id": "bomb-water-pressure"}}'
     client.publish("sensors/bomb/water_pressure", payload)
 
     cph1 = bomba.get_phase1_current_A()
-    payload = f'{{"value": {cph1}, "timestamp": {int(time.time())}, "sensor_id": "bomb-current-ph1"}}'
+    payload = f'{{"value": {float(cph1)}, "timestamp": {int(time.time())}, "sensor_id": "bomb-current-ph1"}}'
     client.publish("sensors/bomb/current_ph1", payload)
 
     cph2 = bomba.get_phase1_current_A()
-    payload = f'{{"value": {cph2}, "timestamp": {int(time.time())}, "sensor_id": "bomb-current-ph2"}}'
+    payload = f'{{"value": {float(cph2)}, "timestamp": {int(time.time())}, "sensor_id": "bomb-current-ph2"}}'
     client.publish("sensors/bomb/current_ph1", payload)
 
     print(f"{datetime.now()} Publishing: {pressure} psi, {cph1} A, {cph2} B")

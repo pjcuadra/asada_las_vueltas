@@ -32,6 +32,7 @@ if not ca_certs_path:
 client = InfluxDBClient(url=influx_url, token=influx_token, org=influx_org)
 write_api = client.write_api(write_options=SYNCHRONOUS)
 
+
 # MQTT Callback Functions
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
@@ -48,7 +49,7 @@ def on_message(client, userdata, msg):
     try:
         payload = json.loads(msg.payload.decode())
         point = Point("water_pressure") \
-            .tag("sensor_id", payload['sensor_id']) \
+            .tag("sensor_id", float(payload['sensor_id'])) \
             .field("value", payload['value']) \
             .time(payload['timestamp'], write_precision='s')  # Assuming timestamp is in seconds
 
