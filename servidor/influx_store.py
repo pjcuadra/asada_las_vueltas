@@ -5,12 +5,12 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 # MQTT Configuration from Environment Variables
-broker_address = os.environ.get('MQTT_BROKER_ADDRESS', 'http://mqtt-broker')
+broker_address = os.environ.get('MQTT_BROKER_ADDRESS', 'localhost')
 broker_port = int(os.environ.get('MQTT_BROKER_PORT', 1883))
 topic = "sensors/bomb/water_pressure"
 
 # InfluxDB Configuration from Environment Variables
-influx_url = os.environ.get('INFLUXDB_URL', 'http://influxdb:8086')
+influx_url = os.environ.get('INFLUXDB_URL', 'http://localhost:8086')
 influx_token = os.environ.get('INFLUXDB_TOKEN')
 influx_org = os.environ.get('INFLUXDB_ORG')
 influx_bucket = os.environ.get('INFLUXDB_BUCKET', 'telemetry_data')  # Default bucket
