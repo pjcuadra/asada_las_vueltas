@@ -85,12 +85,14 @@ def state_machine(obj):
                                              17*1.05)
 
         if obj.started:
-            obj.steady_state = True
             obj.pressure = obj.pressure + pressure_inc
             obj.current_ph1 = obj.current_ph1 + current_inc
             obj.current_ph2 = obj.current_ph2 + current_inc
+            if obj.pressure > 70:
+                obj.steady_state = True
 
         if obj.stopped:
+            obj.steady_state = False
             obj.pressure = max(obj.pressure - pressure_inc, 0)
             obj.current_ph1 = max(obj.current_ph1 - current_inc, 0)
             obj.current_ph2 = max(obj.current_ph2 - current_inc, 0)
