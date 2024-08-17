@@ -131,7 +131,7 @@ bomba = BombaModelo()
 
 BOMB_ON_SLEEP_TIME = 5
 BOMB_TURNING_OFF_SLEEP_TIME = 10
-BOMB_OFF_SLEEP_TIME = 30 * 60
+BOMB_OFF_SLEEP_TIME = 60
 SLEEP_TIME = BOMB_OFF_SLEEP_TIME
 
 # Check if environment variables are set
