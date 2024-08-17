@@ -4,6 +4,7 @@ import os
 import RPi.GPIO as GPIO
 import random
 from datetime import datetime
+import threading
 
 SETTING_TIME_S = 80
 
@@ -71,56 +72,54 @@ class BombaReal():
         self.stop_time = datetime.now()
 
 
+def state_machine(obj):
+    current_inc = 17 / SETTING_TIME_S
+    pressure_inc = 70 / SETTING_TIME_S
+    while True:
+        if obj.steady_state:
+            obj.pressure = random.uniform(70 *0.95,
+                                         70*1.05)
+            obj.current_ph1 = random.uniform(17 *0.95,
+                                             17*1.05)
+            obj.current_ph2 = random.uniform(17 *0.95,
+                                             17*1.05)
+
+        if obj.started:
+            obj.steady_state = True
+            obj.pressure = obj.pressure + pressure_inc
+            obj.current_ph1 = obj.current_ph1 + current_inc
+            obj.current_ph2 = obj.current_ph2 + current_inc
+
+        if obj.stopped:
+            obj.pressure = max(obj.pressure - pressure_inc, 0)
+            obj.current_ph1 = max(obj.current_ph1 - current_inc, 0)
+            obj.current_ph2 = max(obj.current_ph2 - current_inc, 0)
+
+        time.sleep(1)
+
+
 class BombaModelo(BombaReal):
+    thread = None
+    steady_state = False
+    pressure = 0
+    current_ph1 = 0
+    current_ph2 = 0
 
     def __init__(self) -> None:
-        pass
+        self.thread = threading.Thread(target=state_machine, args=(self))
+        self.thread.start()
 
     def relay_signal_set(self, value):
         pass
 
-    def get_variable(self, steady_state_val, last_val):
-        global SETTING_TIME_S
-        # Calculate the time delta
-        now = datetime.now()
-
-        if self.started:
-            delta_since_started = now - self.start_time
-
-            # Steady state
-            if delta_since_started.seconds > SETTING_TIME_S:
-                return random.uniform(steady_state_val*0.95,
-                                      steady_state_val*1.05)
-            else:
-                last_val = last_val + steady_state_val * delta_since_started.seconds / SETTING_TIME_S
-                if last_val > steady_state_val:
-                    last_val = random.uniform(steady_state_val*0.95,
-                                              steady_state_val*1.05)
-                return last_val
-
-        if self.stopped:
-            delta_since_stopped = now - self.stop_time
-
-            # Steady state
-            if delta_since_stopped.seconds > SETTING_TIME_S:
-                return 0
-            else:
-                last_val = last_val - steady_state_val * delta_since_stopped.seconds / SETTING_TIME_S
-                if last_val < 0:
-                    last_val = 0
-                return last_val
-
-        return 0
-
     def get_pressure_psi(self):
-        self.last_pressure = self.get_variable(70, self.last_pressure)
-        return self.last_pressure
+        return self.pressure
 
     def get_phase1_current_A(self):
-        return self.get_variable(17, self.last_current_ph1)
+        return self.current_ph1
 
     def get_phase2_current_A(self):
-        return self.get_variable(17, self.last_current_ph2)
+        return self.current_ph2
 
 
 # MQTT Configuration from Environment Variables
