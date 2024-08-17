@@ -2,8 +2,9 @@ import time
 import random
 import paho.mqtt.client as mqtt
 import os
-import RPi.GPIO as GPIO
 import ssl
+
+from .bomb import BombaModelo
 
 # MQTT Configuration from Environment Variables
 broker_address = os.environ.get('MQTT_BROKER_ADDRESS')
@@ -14,8 +15,9 @@ ca_certs_path = os.environ.get('MQTT_CA_CERTS')
 pressure_topic = "sensors/bomb/water_pressure"
 actuator_topic = "actuators/bomba"
 
-# GPIO Pin Configuration
-GPIO_PIN = 4
+bomba = BombaModelo()
+
+SLEEP_TIME = 5
 
 # Check if environment variables are set
 if not broker_address:
@@ -25,9 +27,6 @@ if not username or not password:
 if not ca_certs_path:
     raise ValueError("MQTT_CA_CERTS environment variable is required")
 
-# GPIO Setup
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(GPIO_PIN, GPIO.OUT)
 
 # MQTT Callback Functions
 def on_connect(client, userdata, flags, rc):
@@ -37,18 +36,18 @@ def on_connect(client, userdata, flags, rc):
     else:
         print(f"Failed to connect, return code {rc}")
 
+
 def on_message(client, userdata, msg):
+    global SLEEP_TIME
     payload = msg.payload.decode()
     if payload == "ON":
-        GPIO.output(GPIO_PIN, GPIO.HIGH)
+        bomba.start()
+        SLEEP_TIME = 5
         print("Digital signal turned ON")
     elif payload == "OFF":
-        GPIO.output(GPIO_PIN, GPIO.LOW)
+        bomba.stop()
+        SLEEP_TIME = 30 * 60
         print("Digital signal turned OFF")
-
-def get_water_bomb_pressure():
-    """Simulates getting pressure from a sensor (replace with actual sensor reading)"""
-    return random.uniform(100, 120)
 
 # MQTT Client Setup
 client = mqtt.Client()
@@ -68,11 +67,8 @@ client.connect(broker_address, broker_port)
 client.loop_start()
 
 while True:
-    pressure = get_water_bomb_pressure()
+    pressure = bomba.get_pressure_psi()
     payload = f'{{"value": {pressure}, "timestamp": {int(time.time())}, "sensor_id": "bomb-water-pressure"}}'
     client.publish(pressure_topic, payload)
     print(f"Published pressure: {pressure} psi")
-    time.sleep(5)
-
-# Cleanup GPIO on exit
-GPIO.cleanup()
+    time.sleep(SLEEP_TIME)
