@@ -113,7 +113,8 @@ class BombaModelo(BombaReal):
         return 0
 
     def get_pressure_psi(self):
-        return self.get_variable(70, self.last_pressure)
+        self.last_pressure = self.get_variable(70, self.last_pressure)
+        return self.last_pressure
 
     def get_phase1_current_A(self):
         return self.get_variable(17, self.last_current_ph1)
