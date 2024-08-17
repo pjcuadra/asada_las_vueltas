@@ -119,6 +119,7 @@ actuator_topic = "actuators/bomba"
 bomba = BombaModelo()
 
 BOMB_ON_SLEEP_TIME = 5
+BOMB_TURNING_OFF_SLEEP_TIME = 10
 BOMB_OFF_SLEEP_TIME = 30 * 60
 SLEEP_TIME = BOMB_OFF_SLEEP_TIME
 
@@ -149,7 +150,7 @@ def on_message(client, userdata, msg):
         print(f"{datetime.now()} Digital signal turned ON")
     elif payload == "OFF":
         bomba.stop()
-        SLEEP_TIME = BOMB_OFF_SLEEP_TIME
+        SLEEP_TIME = BOMB_TURNING_OFF_SLEEP_TIME
         print(f"{datetime.now()} Digital signal turned OFF")
 
 
@@ -160,6 +161,9 @@ def wait_next_iteration():
         print(f"{datetime.now()} Sleeping")
         if bomba.started:
             break
+
+    if bomba.stopped:
+        SLEEP_TIME = BOMB_OFF_SLEEP_TIME
 
 
 # MQTT Client Setup
