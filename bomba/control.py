@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 import random
 from datetime import datetime
 
-SETTING_TIME_S = 300
+SETTING_TIME_S = 80
 
 
 class BombaReal():
@@ -15,6 +15,9 @@ class BombaReal():
     stop_time = None
     client = None
     RELAY_PIN = 4
+    last_pressure = 0
+    last_current_ph1 = 0
+    last_current_ph2 = 0
 
     def __init__(self):
         # GPIO Setup
@@ -60,6 +63,7 @@ class BombaReal():
     def stop(self):
         self.started = False
         self.stopped = True
+        self.last_pressure_value = self.get_pressure_psi()
         self.relay_signal_set(False)
         self.stop_time = datetime.now()
 
@@ -72,7 +76,7 @@ class BombaModelo(BombaReal):
     def relay_signal_set(self, value):
         pass
 
-    def get_variable(self, steady_state_val):
+    def get_variable(self, steady_state_val, last_val):
         global SETTING_TIME_S
         # Calculate the time delta
         now = datetime.now()
@@ -85,7 +89,11 @@ class BombaModelo(BombaReal):
                 return random.uniform(steady_state_val*0.95,
                                       steady_state_val*1.05)
             else:
-                return steady_state_val * delta_since_started.seconds / SETTING_TIME_S
+                last_val = last_val + steady_state_val * delta_since_started.seconds / SETTING_TIME_S
+                if last_val > steady_state_val:
+                    last_val = random.uniform(steady_state_val*0.95,
+                                              steady_state_val*1.05)
+                return last_val
 
         if self.stopped:
             delta_since_stopped = now - self.stop_time
@@ -94,18 +102,21 @@ class BombaModelo(BombaReal):
             if delta_since_stopped.seconds > SETTING_TIME_S:
                 return 0
             else:
-                return steady_state_val - steady_state_val * delta_since_stopped.seconds / SETTING_TIME_S
+                last_val = last_val - steady_state_val * delta_since_stopped.seconds / SETTING_TIME_S
+                if last_val < 0:
+                    last_val = 0
+                return last_val
 
         return 0
 
     def get_pressure_psi(self):
-        return self.get_variable(70)
+        return self.get_variable(70, self.last_pressure)
 
     def get_phase1_current_A(self):
-        return self.get_variable(17)
+        return self.get_variable(17, self.last_current_ph1)
 
     def get_phase2_current_A(self):
-        return self.get_variable(17)
+        return self.get_variable(17, self.last_current_ph2)
 
 
 # MQTT Configuration from Environment Variables
@@ -198,3 +209,4 @@ while True:
 
     print(f"{datetime.now()} Publishing: {pressure} psi, {cph1} A, {cph2} B")
     wait_next_iteration()
+
