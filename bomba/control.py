@@ -247,7 +247,7 @@ def state_machine(bomba, state, events):
         time.sleep(1)
 
 
-def publish_data(state, sleeps_per_state):
+def publish_data(state, sleeps_per_state, client):
     global SLEEP_TIME
 
     while True:
@@ -277,10 +277,6 @@ get_sensors_data()
 contro_sm = threading.Thread(target=state_machine, args=(bomba, state, events))
 contro_sm.start()
 
-publisher = threading.Thread(target=publish_data, args=(state, sleeps_per_state))
-publisher.start()
-
-
 # MQTT Client Setup
 client = mqtt.Client()
 client.on_connect = on_connect
@@ -294,6 +290,12 @@ client.tls_set(ca_certs=ca_certs_path)
 
 # Connect to MQTT Broker
 client.connect(broker_address, broker_port)
+
+publisher = threading.Thread(target=publish_data, args=(state, sleeps_per_state, client))
+publisher.start()
+
+
+
 
 # Start the MQTT client's network loop in a separate thread
 client.loop_start()
