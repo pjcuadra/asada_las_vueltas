@@ -49,8 +49,8 @@ def on_message(client, userdata, msg):
     try:
         payload = json.loads(msg.payload.decode())
         point = Point("water_pressure") \
-            .tag("sensor_id", float(payload['sensor_id'])) \
-            .field("value", payload['value']) \
+            .tag("sensor_id", payload['sensor_id']) \
+            .field("value", float(payload['value'])) \
             .time(payload['timestamp'], write_precision='s')  # Assuming timestamp is in seconds
 
         write_api.write(bucket=influx_bucket, org=influx_org, record=point)
