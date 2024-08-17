@@ -274,10 +274,10 @@ state['prev_sm_state'] = ""
 
 
 get_sensors_data()
-contro_sm = threading.Thread(target=state_machine, publish_data=(bomba, state, events))
+contro_sm = threading.Thread(target=state_machine, args=(bomba, state, events))
 contro_sm.start()
 
-publisher = threading.Thread(target=state_machine, publish_data=(state, sleeps_per_state))
+publisher = threading.Thread(target=state_machine, args=(state, sleeps_per_state))
 publisher.start()
 
 
