@@ -61,11 +61,12 @@ class BombaReal():
         self.start_time = datetime.now()
 
     def stop(self):
-        self.started = False
-        self.stopped = True
         self.last_pressure = self.get_pressure_psi()
         self.last_current_ph1 = self.get_phase1_current_A()
         self.last_current_ph2 = self.get_phase2_current_A()
+
+        self.started = False
+        self.stopped = True
         self.relay_signal_set(False)
         self.stop_time = datetime.now()
 
