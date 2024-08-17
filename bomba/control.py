@@ -233,6 +233,7 @@ def state_machine(bomba, state, events):
             bomba.stop()
             stop_count = 120
             print("Next State: 'stopping'")
+            state['sm_state'] = 'stopping'
         if state['sm_state'] == 'stopping':
             if state['sm_state'] != state['prev_sm_state']:
                 print("Entering state: 'stopping'")
