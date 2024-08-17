@@ -5,8 +5,21 @@ import RPi.GPIO as GPIO
 import random
 from datetime import datetime
 import threading
+from pprint import pprint
 
 SETTING_TIME_S = 80
+
+events = {
+    'start': False,
+    'stop': True,
+}
+
+sleeps_per_state = {
+    "start": 1,
+    "started": 1,
+    "stop": 5,
+    "stopped": 600
+}
 
 
 class BombaReal():
@@ -72,7 +85,7 @@ class BombaReal():
         self.stop_time = datetime.now()
 
 
-def state_machine(obj):
+def model_state_machine(obj):
     current_inc = 17 / SETTING_TIME_S
     pressure_inc = 70 / SETTING_TIME_S
     while True:
@@ -108,7 +121,7 @@ class BombaModelo(BombaReal):
     current_ph2 = 0
 
     def __init__(self) -> None:
-        self.thread = threading.Thread(target=state_machine, args=(self,))
+        self.thread = threading.Thread(target=model_state_machine, args=(self,))
         self.thread.start()
 
     def relay_signal_set(self, value):
@@ -158,15 +171,13 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
-    global SLEEP_TIME
+    global events
     payload = msg.payload.decode()
     if payload == "ON":
-        bomba.start()
-        SLEEP_TIME = BOMB_ON_SLEEP_TIME
+        events['start'] = True
         print(f"{datetime.now()} Digital signal turned ON")
     elif payload == "OFF":
-        bomba.stop()
-        SLEEP_TIME = BOMB_TURNING_OFF_SLEEP_TIME
+        events['stop'] = True
         print(f"{datetime.now()} Digital signal turned OFF")
 
 
@@ -174,12 +185,100 @@ def wait_next_iteration():
     global SLEEP_TIME
     for i in range(SLEEP_TIME):
         time.sleep(1)
-        print(f"{datetime.now()} Sleeping")
         if bomba.started:
             break
 
     if bomba.stopped:
         SLEEP_TIME = BOMB_OFF_SLEEP_TIME
+
+
+def get_sensors_data():
+    state['pressure'] = bomba.get_pressure_psi()
+    state['current_ph1'] = bomba.get_phase1_current_A()
+    state['current_ph2'] = bomba.get_phase1_current_A()
+
+
+def state_machine(bomba, state, events):
+    stop_count = 0
+
+    while True:
+
+        get_sensors_data()
+
+        if events['start']:
+            print("Start event received. Next state: start")
+            state['sm_state'] = 'start'
+            events['start'] = False
+            continue
+
+        if events['stop']:
+            print("Stop event received. Next state: stop")
+            state['sm_state'] = 'stop'
+            events['stop'] = False
+            continue
+
+        if state['sm_state'] == 'start':
+            if state['sm_state'] != state['prev_sm_state']:
+                print("Entering state: 'start'")
+            bomba.start()
+            state['sm_state'] = 'started'
+            print("State: start, Next State: 'started'")
+        if state['sm_state'] == 'started':
+            if state['sm_state'] != state['prev_sm_state']:
+                print("Entering state: 'started'")
+            print("State: started, Next State: 'started'")
+        if state['sm_state'] == 'stop':
+            if state['sm_state'] != state['prev_sm_state']:
+                print("Entering state: 'stop'")
+            bomba.stop()
+            stop_count = 120
+            print("Next State: 'stopping'")
+        if state['sm_state'] == 'stopping':
+            if state['sm_state'] != state['prev_sm_state']:
+                print("Entering state: 'stopping'")
+            stop_count = stop_count - 1
+            if stop_count == 0:
+                print("Next State: 'stopped'")
+        if state['sm_state'] == 'stopped':
+            if state['sm_state'] != state['prev_sm_state']:
+                print("Entering state: 'stopped'")
+
+        state['prev_sm_state'] = state['sm_state']
+        time.sleep(1)
+
+
+def publish_data(state, sleeps_per_state):
+    global SLEEP_TIME
+
+    while True:
+        pressure = state['pressure']
+        payload = f'{{"value": {float(pressure)}, "timestamp": {int(time.time())}, "sensor_id": "bomb-water-pressure"}}'
+        client.publish("sensors/bomb/water_pressure", payload)
+
+        cph1 = state['current_ph1']
+        payload = f'{{"value": {float(cph1)}, "timestamp": {int(time.time())}, "sensor_id": "bomb-current-ph1"}}'
+        client.publish("sensors/bomb/current_ph1", payload)
+
+        cph2 = state['current_ph2']
+        payload = f'{{"value": {float(cph2)}, "timestamp": {int(time.time())}, "sensor_id": "bomb-current-ph2"}}'
+        client.publish("sensors/bomb/current_ph1", payload)
+
+        print(f"{datetime.now()} Publishing: {pressure} psi, {cph1} A, {cph2} B")
+        time.sleep(sleeps_per_state[state['sm_state']])
+
+
+state = dict()
+state['sm_state'] = "stopped"
+state['prev_sm_state'] = ""
+
+
+
+get_sensors_data()
+contro_sm = threading.Thread(target=state_machine, publish_data=(bomba, state, events))
+contro_sm.start()
+
+publisher = threading.Thread(target=state_machine, publish_data=(state, sleeps_per_state))
+publisher.start()
 
 
 # MQTT Client Setup
@@ -199,19 +298,7 @@ client.connect(broker_address, broker_port)
 # Start the MQTT client's network loop in a separate thread
 client.loop_start()
 
+
 while True:
-    pressure = bomba.get_pressure_psi()
-    payload = f'{{"value": {float(pressure)}, "timestamp": {int(time.time())}, "sensor_id": "bomb-water-pressure"}}'
-    client.publish("sensors/bomb/water_pressure", payload)
-
-    cph1 = bomba.get_phase1_current_A()
-    payload = f'{{"value": {float(cph1)}, "timestamp": {int(time.time())}, "sensor_id": "bomb-current-ph1"}}'
-    client.publish("sensors/bomb/current_ph1", payload)
-
-    cph2 = bomba.get_phase1_current_A()
-    payload = f'{{"value": {float(cph2)}, "timestamp": {int(time.time())}, "sensor_id": "bomb-current-ph2"}}'
-    client.publish("sensors/bomb/current_ph1", payload)
-
-    print(f"{datetime.now()} Publishing: {pressure} psi, {cph1} A, {cph2} B")
-    wait_next_iteration()
-
+    pprint(state)
+    time.sleep(15)
