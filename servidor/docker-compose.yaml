@@ -5,15 +5,15 @@ services:
     ports:
       - "1883:1883"   # Default MQTT port
     volumes:
-      - ./mosquitto-data:/mosquitto/data
-      - ./mosquitto-config:/mosquitto/config
+      - ./mqtt/mosquitto-data:/mosquitto/data
+      - ./mqtt/mosquitto-config:/mosquitto/config
     env_file:
       - .env  # Reference the .env file
 
   influxdb:
     image: influxdb:latest
     volumes:
-      - ./influxdb-data:/var/lib/influxdb2
+      - /var/lib/influxdb2:/var/lib/influxdb2
     ports:
       - "8086:8086"  # InfluxDB HTTP API port
     env_file:
@@ -26,14 +26,14 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./grafana-data:/var/lib/grafana
+      - /var/lib/grafana:/var/lib/grafana
     env_file:
       - .env
 
   config-db:
     image: postgres:latest
     volumes:
-      - ./config-db-data:/var/lib/postgresql/data
+      - /var/lib/postgresql/data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     env_file:
