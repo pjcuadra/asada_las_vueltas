@@ -1,15 +1,5 @@
 version: '3'
 services:
-  mqtt-broker:
-    image: eclipse-mosquitto
-    ports:
-      - "1883:1883"   # Default MQTT port
-    volumes:
-      - ./mqtt/mosquitto-data:/mosquitto/data
-      - ./mqtt/mosquitto-config:/mosquitto/config
-    env_file:
-      - .env  # Reference the .env file
-
   influxdb:
     image: influxdb:latest
     volumes:
