@@ -106,7 +106,7 @@ class BombaModelo(BombaReal):
     current_ph2 = 0
 
     def __init__(self) -> None:
-        self.thread = threading.Thread(target=state_machine, args=self)
+        self.thread = threading.Thread(target=state_machine, args=(self,))
         self.thread.start()
 
     def relay_signal_set(self, value):
