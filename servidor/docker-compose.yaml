@@ -13,7 +13,7 @@ services:
   influxdb:
     image: influxdb:latest
     volumes:
-      - /var/lib/influxdb2:/var/lib/influxdb2
+      - influxdb-data:/var/lib/influxdb2
     ports:
       - "8086:8086"  # InfluxDB HTTP API port
     env_file:
@@ -26,15 +26,20 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - /var/lib/grafana:/var/lib/grafana
+      - grafana-data:/var/lib/grafana
     env_file:
       - .env
 
   config-db:
     image: postgres:latest
     volumes:
-      - /var/lib/postgresql/data:/var/lib/postgresql/data
+      - config-db-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
     env_file:
       - .env
+
+volumes:
+  influxdb-data:
+  grafana-data:
+  config-db-data:
