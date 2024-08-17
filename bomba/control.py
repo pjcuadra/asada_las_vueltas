@@ -78,7 +78,7 @@ def state_machine(obj):
     while True:
         if obj.steady_state:
             obj.pressure = random.uniform(70 *0.95,
-                                         70*1.05)
+                                          70*1.05)
             obj.current_ph1 = random.uniform(17 *0.95,
                                              17*1.05)
             obj.current_ph2 = random.uniform(17 *0.95,
@@ -106,7 +106,7 @@ class BombaModelo(BombaReal):
     current_ph2 = 0
 
     def __init__(self) -> None:
-        self.thread = threading.Thread(target=state_machine, args=(self))
+        self.thread = threading.Thread(target=state_machine, args=self)
         self.thread.start()
 
     def relay_signal_set(self, value):
