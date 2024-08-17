@@ -119,7 +119,9 @@ actuator_topic = "actuators/bomba"
 
 bomba = BombaModelo()
 
-SLEEP_TIME = 5
+BOMB_ON_SLEEP_TIME = 5
+BOMB_OFF_SLEEP_TIME = 30 * 60
+SLEEP_TIME = BOMB_OFF_SLEEP_TIME
 
 # Check if environment variables are set
 if not broker_address:
@@ -144,12 +146,21 @@ def on_message(client, userdata, msg):
     payload = msg.payload.decode()
     if payload == "ON":
         bomba.start()
-        SLEEP_TIME = 5
+        SLEEP_TIME = BOMB_ON_SLEEP_TIME
         print("Digital signal turned ON")
     elif payload == "OFF":
         bomba.stop()
-        SLEEP_TIME = 30 * 60
+        SLEEP_TIME = BOMB_OFF_SLEEP_TIME
         print("Digital signal turned OFF")
+
+
+def wait_next_iteration():
+    global SLEEP_TIME
+    for i in range(SLEEP_TIME):
+        time.sleep(SLEEP_TIME)
+        if bomba.started:
+            break
+
 
 # MQTT Client Setup
 client = mqtt.Client()
@@ -173,4 +184,4 @@ while True:
     payload = f'{{"value": {pressure}, "timestamp": {int(time.time())}, "sensor_id": "bomb-water-pressure"}}'
     client.publish(pressure_topic, payload)
     print(f"{datetime.now()} Published pressure: {pressure} psi")
-    time.sleep(SLEEP_TIME)
+    wait_next_iteration()
