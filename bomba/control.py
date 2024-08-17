@@ -1,8 +1,9 @@
 import time
-import random
 import paho.mqtt.client as mqtt
 import os
 import ssl
+
+from datetime import datetime
 
 from .bomb import BombaModelo
 
@@ -70,5 +71,5 @@ while True:
     pressure = bomba.get_pressure_psi()
     payload = f'{{"value": {pressure}, "timestamp": {int(time.time())}, "sensor_id": "bomb-water-pressure"}}'
     client.publish(pressure_topic, payload)
-    print(f"Published pressure: {pressure} psi")
+    print(f"{datetime.now()} Published pressure: {pressure} psi")
     time.sleep(SLEEP_TIME)
