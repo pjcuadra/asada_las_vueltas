@@ -114,7 +114,6 @@ broker_port = int(os.environ.get('MQTT_BROKER_PORT', 8883))
 username = os.environ.get('MQTT_USERNAME')
 password = os.environ.get('MQTT_PASSWORD')
 ca_certs_path = os.environ.get('MQTT_CA_CERTS')
-pressure_topic = "sensors/bomb/water_pressure"
 actuator_topic = "actuators/bomba"
 
 bomba = BombaModelo()
@@ -183,6 +182,15 @@ client.loop_start()
 while True:
     pressure = bomba.get_pressure_psi()
     payload = f'{{"value": {pressure}, "timestamp": {int(time.time())}, "sensor_id": "bomb-water-pressure"}}'
-    client.publish(pressure_topic, payload)
-    print(f"{datetime.now()} Published pressure: {pressure} psi")
+    client.publish("sensors/bomb/water_pressure", payload)
+
+    cph1 = bomba.get_phase1_current_A()
+    payload = f'{{"value": {cph1}, "timestamp": {int(time.time())}, "sensor_id": "bomb-current-ph1"}}'
+    client.publish("sensors/bomb/current_ph1", payload)
+
+    cph2 = bomba.get_phase1_current_A()
+    payload = f'{{"value": {cph2}, "timestamp": {int(time.time())}, "sensor_id": "bomb-current-ph2"}}'
+    client.publish("sensors/bomb/current_ph1", payload)
+
+    print(f"{datetime.now()} Publishing: {pressure} psi, {cph1} A, {cph2} B")
     wait_next_iteration()
