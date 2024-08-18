@@ -234,7 +234,6 @@ def state_machine(bomba, state, events):
         if state['sm_state'] == 'started':
             if state['sm_state'] != state['prev_sm_state']:
                 print("Entering state: 'started'")
-            print("State: started, Next State: 'started'")
         if state['sm_state'] == 'stop':
             if state['sm_state'] != state['prev_sm_state']:
                 print("Entering state: 'stop'")
@@ -274,8 +273,11 @@ def publish_data(state, sleeps_per_state, client):
         client.publish("sensors/bomb/current_ph1", payload)
 
         print(f"{datetime.now()} Publishing: {pressure} psi, {cph1} A, {cph2} B")
-        time.sleep(sleeps_per_state[state['sm_state']])
 
+        for i in range(sleeps_per_state[state['sm_state']]):
+            if i > sleeps_per_state[state['sm_state']]:
+                break
+            time.sleep(1)
 
 state = dict()
 state['sm_state'] = "stopped"
