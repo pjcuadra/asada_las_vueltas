@@ -5,6 +5,7 @@ from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import keyring
 from getpass import getpass
+from pprint import pprint
 
 # MQTT Configuration from Environment Variables
 broker_address = os.environ.get('MQTT_BROKER_ADDRESS')
@@ -55,6 +56,8 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     try:
         payload = json.loads(msg.payload.decode())
+
+        pprint(payload)
 
         if payload['sensor_id'] in ["bomb-sm"]:
             point = Point(payload['sensor_id']) \
