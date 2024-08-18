@@ -13,6 +13,10 @@ class BombScheduler():
     running = False
     cronjobs = list()
 
+    def __init__(self):
+        self.contro_sm = threading.Thread(target=self.tick, args=())
+        self.contro_sm.start()
+
     def should_run(self):
         return self.running
 
@@ -67,7 +71,7 @@ class BombScheduler():
     def tick(self):
         while True:
             if self.start_time is None:
-                time.sleep(60)
+                time.sleep(5)
                 self.check_cronjob_schedule()
                 continue
 
@@ -79,8 +83,4 @@ class BombScheduler():
             self.running_time = datetime.now() - self.start_time
             print(f'{datetime.now()} Run Time: {self.running_time}')
 
-            time.sleep(60)
-
-    def start(self):
-        self.contro_sm = threading.Thread(target=self.tick, args=())
-        self.contro_sm.start()
+            time.sleep(5)
