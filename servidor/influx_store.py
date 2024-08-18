@@ -3,12 +3,12 @@ import json
 import os
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
+import keyring
 
 # MQTT Configuration from Environment Variables
 broker_address = os.environ.get('MQTT_BROKER_ADDRESS')
 broker_port = int(os.environ.get('MQTT_BROKER_PORT', 8883))
 username = os.environ.get('MQTT_USERNAME')
-password = os.environ.get('MQTT_PASSWORD')
 ca_certs_path = os.environ.get('MQTT_CA_CERTS')
 topic = "sensors/bomb/water_pressure"
 
@@ -23,10 +23,24 @@ if not influx_token or not influx_org:
     raise ValueError("INFLUXDB_TOKEN and INFLUXDB_ORG environment variables are required")# Check if environment variables are set
 if not broker_address:
     raise ValueError("MQTT_BROKER_ADDRESS environment variable is not set")
-if not username or not password:
+if not username:
     raise ValueError("MQTT_USERNAME and MQTT_PASSWORD environment variables are required")
 if not ca_certs_path:
     raise ValueError("MQTT_CA_CERTS environment variable is required")
+
+
+try:
+    password = keyring.get_password("MQTT", username)
+    if password:
+        print("Password already stored.")
+    else:
+        password = input("Enter MQTT password: ")
+        keyring.set_password("MQTT", username, password)
+        print("Password stored successfully.")
+except keyring.errors.KeyringError as e:
+    print(f"Error accessing keyring: {e}")
+    raise e
+
 
 # InfluxDB Client
 client = InfluxDBClient(url=influx_url, token=influx_token, org=influx_org)

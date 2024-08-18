@@ -6,8 +6,9 @@ import random
 from datetime import datetime
 import threading
 from pprint import pprint
+import keyring
 
-from bomba.control.sm import ControlSM
+from bomb_control.sm import ControlSM
 
 SETTING_TIME_S = 80
 
@@ -145,9 +146,20 @@ class BombaModelo(BombaReal):
 broker_address = os.environ.get('MQTT_BROKER_ADDRESS')
 broker_port = int(os.environ.get('MQTT_BROKER_PORT', 8883))
 username = os.environ.get('MQTT_USERNAME')
-password = os.environ.get('MQTT_PASSWORD')
 ca_certs_path = os.environ.get('MQTT_CA_CERTS')
 actuator_topic = "actuators/bomba"
+
+try:
+    password = keyring.get_password("MQTT", username)
+    if password:
+        print("Password already stored.")
+    else:
+        password = input("Enter MQTT password: ")
+        keyring.set_password("MQTT", username, password)
+        print("Password stored successfully.")
+except keyring.errors.KeyringError as e:
+    print(f"Error accessing keyring: {e}")
+    raise e
 
 bomba = BombaModelo()
 
