@@ -79,5 +79,5 @@ class MQTTController():
 
     def start_publisher(self):
         self.publisher = threading.Thread(target=self.publish_data,
-                                          args=(sm.state))
+                                          args=())
         self.publisher.start()
