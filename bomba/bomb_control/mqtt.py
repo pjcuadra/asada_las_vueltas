@@ -37,8 +37,9 @@ def on_message(client, userdata, msg):
 class MQTTController():
     client = None
 
-    def __init__(self, addr, port, username, password, ca_cert, schd):
+    def __init__(self, addr, port, username, password, ca_cert, sm, schd):
         self.schd = schd
+        self.sm = sm
         self.client = mqtt.Client(userdata={"scheduler": schd})
         self.client.on_connect = on_connect
         self.client.on_message = on_message

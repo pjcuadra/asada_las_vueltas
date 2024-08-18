@@ -41,6 +41,7 @@ mqtt_contrl = MQTTController(broker_address,
                              username,
                              password,
                              ca_certs_path,
+                             sm,
                              schd)
 mqtt_contrl.start_publisher()
 
