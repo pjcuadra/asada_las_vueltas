@@ -27,12 +27,10 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
-    payload = msg.payload.decode()
-    pprint(payload)
-    payload = json.loads(payload)
+    payload = json.loads(msg.payload.decode())
     pprint(payload)
     if payload['action'] == "on":
-        userdata['scheduler'].schedule_now(timedelta(minutes=5))
+        userdata['scheduler'].schedule_now(timedelta(minutes=payload['delta']))
         print(f"{datetime.now()} Digital signal turned ON")
     elif payload['action'] == "off":
         userdata['scheduler'].cancel_scheduled()
