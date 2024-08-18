@@ -47,6 +47,7 @@ def on_connect(client, userdata, flags, rc):
         client.subscribe("sensors/bomb/water_pressure")
         client.subscribe("sensors/bomb/current_ph1")
         client.subscribe("sensors/bomb/current_ph2")
+        client.subscribe("sm/bomb/bomb_control")
     else:
         print(f"Failed to connect, return code {rc}")
 
@@ -54,10 +55,17 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     try:
         payload = json.loads(msg.payload.decode())
-        point = Point(payload['sensor_id']) \
-            .tag("sensor_id", payload['sensor_id']) \
-            .field("value", float(payload['value'])) \
-            .time(payload['timestamp'], write_precision='s')  # Assuming timestamp is in seconds
+
+        if payload['sensor_id'] in ["bomb-sm"]:
+            point = Point(payload['sensor_id']) \
+                .tag("sensor_id", payload['sensor_id']) \
+                .field("value", payload['value']) \
+                .time(payload['timestamp'], write_precision='s')  # Assuming timestamp is in seconds
+        else:
+            point = Point(payload['sensor_id']) \
+                .tag("sensor_id", payload['sensor_id']) \
+                .field("value", float(payload['value'])) \
+                .time(payload['timestamp'], write_precision='s')  # Assuming timestamp is in seconds
 
         write_api.write(bucket=influx_bucket, org=influx_org, record=point)
         print(f"Stored data in InfluxDB: {payload}")
