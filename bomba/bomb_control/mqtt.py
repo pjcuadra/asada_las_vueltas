@@ -72,7 +72,7 @@ class MQTTController():
             self.client.publish("sensors/bomb/current_ph1", payload)
 
             state = self.sm.state['sm_state']
-            payload = f'{{"value": {state}, "timestamp": {int(time.time())}, "sensor_id": "bomb-sm"}}'
+            payload = f'{{"value": "{state}", "timestamp": {int(time.time())}, "sensor_id": "bomb-sm"}}'
             self.client.publish("sm/bomb/bomb_control", payload)
 
             if self.sm.state['sm_state'] in ['init', 'stop', 'stopped', 'stopping']:
