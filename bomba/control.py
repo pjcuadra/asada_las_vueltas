@@ -241,6 +241,7 @@ def state_machine(bomba, state, events):
             stop_count = stop_count - 1
             if stop_count == 0:
                 print("Next State: 'stopped'")
+                state['sm_state'] = 'stopped'
         if state['sm_state'] == 'stopped':
             if state['sm_state'] != state['prev_sm_state']:
                 print("Entering state: 'stopped'")
@@ -273,8 +274,6 @@ state = dict()
 state['sm_state'] = "stopped"
 state['prev_sm_state'] = ""
 
-
-
 get_sensors_data()
 contro_sm = threading.Thread(target=state_machine, args=(bomba, state, events))
 contro_sm.start()
@@ -296,12 +295,8 @@ client.connect(broker_address, broker_port)
 publisher = threading.Thread(target=publish_data, args=(state, sleeps_per_state, client))
 publisher.start()
 
-
-
-
 # Start the MQTT client's network loop in a separate thread
 client.loop_start()
-
 
 while True:
     pprint(state)
