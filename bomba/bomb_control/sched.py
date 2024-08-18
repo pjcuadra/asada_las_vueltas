@@ -44,6 +44,8 @@ class BombScheduler():
         if delta > timedelta(hours=12):
             return False
 
+        start = datetime.combine(datetime.now(), start)
+
         print(f'{datetime.now()} Adding to cronjob: start {start } delta {delta} end {start + delta}')
 
         self.cronjobs.append({

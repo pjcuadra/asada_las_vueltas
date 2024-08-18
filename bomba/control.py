@@ -1,8 +1,9 @@
-import time
+from time import sleep
 import os
 from pprint import pprint
 import keyring
 from getpass import getpass
+from datetime import timedelta, time
 
 from bomb_control.sm import ControlSM
 from bomb_control.bombs import BombaModelo
@@ -45,6 +46,8 @@ mqtt_contrl = MQTTController(broker_address,
                              schd)
 mqtt_contrl.start_publisher()
 
+schd.schedule_at(time(hour=12, minute=0, seconde=0). timedelta(minutes=5))
+
 while True:
     pprint(sm.state)
-    time.sleep(15)
+    sleep(15)
