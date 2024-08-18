@@ -87,6 +87,6 @@ class ControlSM():
         self.state['current_ph2'] = self.bomb.get_phase1_current_A()
 
     def start(self):
-        self.contro_sm = threading.Thread(target=self.state_machine, args=(self,))
+        self.contro_sm = threading.Thread(target=self.state_machine, args=())
         self.contro_sm.start()
 

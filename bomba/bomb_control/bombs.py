@@ -83,7 +83,7 @@ class BombaModelo(BombaReal):
         self.op_current = op_current
         self.op_pressure = op_pressure
         self.thread = threading.Thread(target=self.model_state_machine,
-                                       args=(self,))
+                                       args=())
         self.thread.start()
 
     def model_state_machine(self):
