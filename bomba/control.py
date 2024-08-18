@@ -7,6 +7,7 @@ from getpass import getpass
 from bomb_control.sm import ControlSM
 from bomb_control.bombs import BombaModelo
 from bomb_control.mqtt import MQTTController
+from bomb_control.sched import BombScheduler
 
 
 # MQTT Configuration from Environment Variables
@@ -30,6 +31,7 @@ if not ca_certs_path:
     raise ValueError("MQTT_CA_CERTS environment variable is required")
 
 bomba = BombaModelo()
+schd = BombScheduler()
 
 sm = ControlSM(bomba)
 sm.start()
@@ -39,7 +41,7 @@ mqtt_contrl = MQTTController(broker_address,
                              username,
                              password,
                              ca_certs_path,
-                             sm)
+                             schd)
 mqtt_contrl.start_publisher()
 
 while True:

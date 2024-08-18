@@ -7,7 +7,8 @@ class ControlSM():
     state = dict()
     events = dict()
 
-    def __init__(self, bomb, sm_period_s=30, stopping_time_s=120):
+    def __init__(self, bomb, sched, sm_period_s=30, stopping_time_s=120):
+        self.sched = sched
         self.sm_period_s = sm_period_s
         self.stopping_time_s = stopping_time_s
         self.bomb = bomb
@@ -23,25 +24,6 @@ class ControlSM():
         while True:
 
             self.update_sensors_data()
-
-            if self.events['start']:
-                if self.state['sm_state'] not in ['start', 'started']:
-                    print("Start event received. Next state: start")
-                    self.state['sm_state'] = 'start'
-                else:
-                    print("Start event received. Already started")
-
-                self.events['start'] = False
-                continue
-
-            if self.events['stop']:
-                if self.state['sm_state'] not in ['stop', 'stopping', 'stopped']:
-                    print("Stop event received. Next state: stop")
-                    self.state['sm_state'] = 'stop'
-                else:
-                    print("Stop event received. Already stopping")
-                self.events['stop'] = False
-                continue
 
             if self.state['sm_state'] == 'init':
                 if self.state['sm_state'] != self.state['prev_sm_state']:
@@ -82,6 +64,15 @@ class ControlSM():
 
             self.state['prev_sm_state'] = self.state['sm_state']
             time.sleep(self.sm_period_s)
+
+            if self.sched.should_run():
+                if self.state['sm_state'] not in ['start', 'started']:
+                    print("Start event received. Next state: start")
+                    self.state['sm_state'] = 'start'
+            else:
+                if self.state['sm_state'] not in ['stop', 'stopping', 'stopped']:
+                    print("Stop event received. Next state: stop")
+                    self.state['sm_state'] = 'stop'
 
     def update_sensors_data(self):
         self.state['pressure'] = self.bomb.get_pressure_psi()

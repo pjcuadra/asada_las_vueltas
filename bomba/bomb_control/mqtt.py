@@ -1,6 +1,6 @@
 import time
 import paho.mqtt.client as mqtt
-from datetime import datetime
+from datetime import datetime, timedelta
 import threading
 
 sleeps_per_state = {
@@ -27,19 +27,19 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     payload = msg.payload.decode()
     if payload == "ON":
-        userdata['sm'].events['start'] = True
+        userdata['scheduler'].schedule_now(timedelta(minutes=5))
         print(f"{datetime.now()} Digital signal turned ON")
     elif payload == "OFF":
-        userdata['sm'].events['stop'] = True
+        userdata['scheduler'].cancel_scheduled()
         print(f"{datetime.now()} Digital signal turned OFF")
 
 
 class MQTTController():
     client = None
 
-    def __init__(self, addr, port, username, password, ca_cert, sm):
-        self.sm = sm
-        self.client = mqtt.Client(userdata={"sm": sm})
+    def __init__(self, addr, port, username, password, ca_cert, schd):
+        self.schd = schd
+        self.client = mqtt.Client(userdata={"scheduler": schd})
         self.client.on_connect = on_connect
         self.client.on_message = on_message
 
