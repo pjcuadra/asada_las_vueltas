@@ -207,14 +207,21 @@ def state_machine(bomba, state, events):
         get_sensors_data()
 
         if events['start']:
-            print("Start event received. Next state: start")
-            state['sm_state'] = 'start'
+            if state['sm_state'] not in ['start', 'started']:
+                print("Start event received. Next state: start")
+                state['sm_state'] = 'start'
+            else:
+                print("Start event received. Already started")
+
             events['start'] = False
             continue
 
         if events['stop']:
-            print("Stop event received. Next state: stop")
-            state['sm_state'] = 'stop'
+            if state['sm_state'] not in ['stop', 'stopping', 'stopped']:
+                print("Stop event received. Next state: stop")
+                state['sm_state'] = 'stop'
+            else:
+                print("Stop event received. Already stopping")
             events['stop'] = False
             continue
 
