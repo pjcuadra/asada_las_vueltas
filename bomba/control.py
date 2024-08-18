@@ -18,6 +18,7 @@ sleeps_per_state = {
     "start": 1,
     "started": 1,
     "stop": 5,
+    "stopping": 5,
     "stopped": 600
 }
 
