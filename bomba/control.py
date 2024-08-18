@@ -46,7 +46,7 @@ mqtt_contrl = MQTTController(broker_address,
                              schd)
 mqtt_contrl.start_publisher()
 
-schd.schedule_at(time(hour=12, minute=1, second=0), timedelta(minutes=5))
+schd.schedule_at(time(hour=12, minute=17, second=0), timedelta(minutes=5))
 
 while True:
     pprint(sm.state)
