@@ -26,6 +26,9 @@ ca_certs_path = os.environ.get('MQTT_CA_CERTS')
 actuator_topic = "actuators/bomba"
 
 password = keyring.get_password("MQTT", username)
+if not password:
+    password = keyring.get_password("MQTT", username)
+    print(password)
 
 # Check if environment variables are set
 if not broker_address:
