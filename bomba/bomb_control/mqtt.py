@@ -2,6 +2,7 @@ import time
 import paho.mqtt.client as mqtt
 from datetime import datetime, timedelta
 import threading
+import json
 
 sleeps_per_state = {
     "init": 30,
@@ -26,10 +27,11 @@ def on_connect(client, userdata, flags, rc):
 
 def on_message(client, userdata, msg):
     payload = msg.payload.decode()
-    if payload == "ON":
+    payload = json.loads(payload)
+    if payload == "on":
         userdata['scheduler'].schedule_now(timedelta(minutes=5))
         print(f"{datetime.now()} Digital signal turned ON")
-    elif payload == "OFF":
+    elif payload['action'] == "off":
         userdata['scheduler'].cancel_scheduled()
         print(f"{datetime.now()} Digital signal turned OFF")
 
