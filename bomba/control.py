@@ -5,6 +5,7 @@ from datetime import datetime
 import threading
 from pprint import pprint
 import keyring
+from getpass import getpass
 
 from bomb_control.sm import ControlSM
 from bomb_control.bombs import BombaModelo
@@ -27,6 +28,7 @@ actuator_topic = "actuators/bomba"
 
 password = keyring.get_password("MQTT", username)
 if not password:
+    password = getpass()
     keyring.set_password("MQTT", username, password)
     print(password)
 
