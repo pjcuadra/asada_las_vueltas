@@ -149,17 +149,7 @@ username = os.environ.get('MQTT_USERNAME')
 ca_certs_path = os.environ.get('MQTT_CA_CERTS')
 actuator_topic = "actuators/bomba"
 
-try:
-    password = keyring.get_password("MQTT", username)
-    if password:
-        print("Password already stored.")
-    else:
-        password = input("Enter MQTT password: ")
-        keyring.set_password("MQTT", username, password)
-        print("Password stored successfully.")
-except keyring.errors.KeyringError as e:
-    print(f"Error accessing keyring: {e}")
-    raise e
+password = keyring.get_password("MQTT", username, prompt=True)
 
 bomba = BombaModelo()
 
