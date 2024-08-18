@@ -79,6 +79,7 @@ class MQTTController():
                 bomb_status = "OFF"
             else:
                 bomb_status = "ON"
+            payload = f'{{"value": "{bomb_status}", "timestamp": {int(time.time())}, "sensor_id": "bomb-relay"}}'
             self.client.publish("sensors/bomb/relay", bomb_status)
 
             print(f"{datetime.now()} Publishing: {pressure} psi, {cph1} A, {cph2} B")

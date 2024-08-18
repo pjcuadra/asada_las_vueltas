@@ -44,11 +44,17 @@ write_api = client.write_api(write_options=SYNCHRONOUS)
 def on_connect(client, userdata, flags, rc):
     if rc == 0:
         print("Connected to MQTT Broker with SSL")
-        client.subscribe("actuators/bomba")
-        client.subscribe("sensors/bomb/water_pressure")
-        client.subscribe("sensors/bomb/current_ph1")
-        client.subscribe("sensors/bomb/current_ph2")
-        client.subscribe("sm/bomb/bomb_control")
+        topics = [
+            "actuators/bomba",
+            "sensors/bomb/water_pressure",
+            "sensors/bomb/current_ph1",
+            "sensors/bomb/current_ph2",
+            "sm/bomb/bomb_control",
+            "sensors/bomb/relay"
+        ]
+
+        for topic in topics:
+            client.subscribe(topic)
     else:
         print(f"Failed to connect, return code {rc}")
 
