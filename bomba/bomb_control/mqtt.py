@@ -4,11 +4,11 @@ from datetime import datetime
 import threading
 
 sleeps_per_state = {
-    "init": 1,
-    "start": 1,
-    "started": 1,
-    "stop": 5,
-    "stopping": 5,
+    "init": 30,
+    "start": 30,
+    "started": 30,
+    "stop": 30,
+    "stopping": 30,
     "stopped": 600
 }
 

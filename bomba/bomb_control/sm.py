@@ -7,7 +7,9 @@ class ControlSM():
     state = dict()
     events = dict()
 
-    def __init__(self, bomb):
+    def __init__(self, bomb, sm_period_s=30, stopping_time_s=120):
+        self.sm_period_s = sm_period_s
+        self.stopping_time_s = stopping_time_s
         self.bomb = bomb
         self.state['sm_state'] = "init"
         self.state['prev_sm_state'] = ""
@@ -62,7 +64,7 @@ class ControlSM():
                 if self.state['sm_state'] != self.state['prev_sm_state']:
                     print("Entering state: 'stop'")
                 self.bomb.stop()
-                stop_count = 120
+                stop_count = self.stopping_time_s / self.sm_period_s
                 print("Next State: 'stopping'")
                 self.state['sm_state'] = 'stopping'
 
@@ -79,7 +81,7 @@ class ControlSM():
                     print("Entering state: 'stopped'")
 
             self.state['prev_sm_state'] = self.state['sm_state']
-            time.sleep(1)
+            time.sleep(self.sm_period_s)
 
     def update_sensors_data(self):
         self.state['pressure'] = self.bomb.get_pressure_psi()
