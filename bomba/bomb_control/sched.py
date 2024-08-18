@@ -70,12 +70,12 @@ class BombScheduler():
 
     def tick(self):
         while True:
+            now = datetime.now()
             if self.start_time is None:
                 time.sleep(5)
-                self.check_cronjob_schedule()
+                self.check_cronjob_schedule(now)
                 continue
 
-            now = datetime.now()
             if now > self.stop_time:
                 self.stop_running()
                 continue
