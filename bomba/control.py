@@ -27,7 +27,7 @@ actuator_topic = "actuators/bomba"
 
 password = keyring.get_password("MQTT", username)
 if not password:
-    password = keyring.get_password("MQTT", username)
+    password = keyring.set_password("MQTT", username)
     print(password)
 
 # Check if environment variables are set
