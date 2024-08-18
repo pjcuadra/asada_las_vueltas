@@ -54,7 +54,7 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     try:
         payload = json.loads(msg.payload.decode())
-        point = Point("water_pressure") \
+        point = Point(payload['sensor_id']) \
             .tag("sensor_id", payload['sensor_id']) \
             .field("value", float(payload['value'])) \
             .time(payload['timestamp'], write_precision='s')  # Assuming timestamp is in seconds
