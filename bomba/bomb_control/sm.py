@@ -77,7 +77,7 @@ class ControlSM():
     def update_sensors_data(self):
         self.state['pressure'] = self.bomb.get_pressure_psi()
         self.state['current_ph1'] = self.bomb.get_phase1_current_A()
-        self.state['current_ph2'] = self.bomb.get_phase1_current_A()
+        self.state['current_ph2'] = self.bomb.get_phase2_current_A()
 
     def start(self):
         self.contro_sm = threading.Thread(target=self.state_machine, args=())
