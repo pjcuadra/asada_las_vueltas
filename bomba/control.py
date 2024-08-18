@@ -47,7 +47,7 @@ mqtt_contrl = MQTTController(broker_address,
 mqtt_contrl.start_publisher()
 
 schd_time = datetime.now().time()
-schd_time = schd_time + time(minute=1)
+schd_time = schd_time + timedelta(minutes=1)
 
 schd.schedule_at(schd_time, timedelta(minutes=5))
 
