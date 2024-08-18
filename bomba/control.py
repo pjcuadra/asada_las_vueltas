@@ -7,6 +7,8 @@ from datetime import datetime
 import threading
 from pprint import pprint
 
+from bomba.control.sm import ControlSM
+
 SETTING_TIME_S = 80
 
 events = {
@@ -15,6 +17,7 @@ events = {
 }
 
 sleeps_per_state = {
+    "init": 1,
     "start": 1,
     "started": 1,
     "stop": 5,
@@ -193,69 +196,6 @@ def wait_next_iteration():
         SLEEP_TIME = BOMB_OFF_SLEEP_TIME
 
 
-def get_sensors_data():
-    state['pressure'] = bomba.get_pressure_psi()
-    state['current_ph1'] = bomba.get_phase1_current_A()
-    state['current_ph2'] = bomba.get_phase1_current_A()
-
-
-def state_machine(bomba, state, events):
-    stop_count = 0
-
-    while True:
-
-        get_sensors_data()
-
-        if events['start']:
-            if state['sm_state'] not in ['start', 'started']:
-                print("Start event received. Next state: start")
-                state['sm_state'] = 'start'
-            else:
-                print("Start event received. Already started")
-
-            events['start'] = False
-            continue
-
-        if events['stop']:
-            if state['sm_state'] not in ['stop', 'stopping', 'stopped']:
-                print("Stop event received. Next state: stop")
-                state['sm_state'] = 'stop'
-            else:
-                print("Stop event received. Already stopping")
-            events['stop'] = False
-            continue
-
-        if state['sm_state'] == 'start':
-            if state['sm_state'] != state['prev_sm_state']:
-                print("Entering state: 'start'")
-            bomba.start()
-            state['sm_state'] = 'started'
-            print("State: start, Next State: 'started'")
-        if state['sm_state'] == 'started':
-            if state['sm_state'] != state['prev_sm_state']:
-                print("Entering state: 'started'")
-        if state['sm_state'] == 'stop':
-            if state['sm_state'] != state['prev_sm_state']:
-                print("Entering state: 'stop'")
-            bomba.stop()
-            stop_count = 120
-            print("Next State: 'stopping'")
-            state['sm_state'] = 'stopping'
-        if state['sm_state'] == 'stopping':
-            if state['sm_state'] != state['prev_sm_state']:
-                print("Entering state: 'stopping'")
-            stop_count = stop_count - 1
-            if stop_count == 0:
-                print("Next State: 'stopped'")
-                state['sm_state'] = 'stopped'
-        if state['sm_state'] == 'stopped':
-            if state['sm_state'] != state['prev_sm_state']:
-                print("Entering state: 'stopped'")
-
-        state['prev_sm_state'] = state['sm_state']
-        time.sleep(1)
-
-
 def publish_data(state, sleeps_per_state, client):
     global SLEEP_TIME
 
@@ -279,13 +219,8 @@ def publish_data(state, sleeps_per_state, client):
                 break
             time.sleep(1)
 
-state = dict()
-state['sm_state'] = "stopped"
-state['prev_sm_state'] = ""
 
-get_sensors_data()
-contro_sm = threading.Thread(target=state_machine, args=(bomba, state, events))
-contro_sm.start()
+sm = ControlSM(bomba)
 
 # MQTT Client Setup
 client = mqtt.Client()
@@ -301,7 +236,7 @@ client.tls_set(ca_certs=ca_certs_path)
 # Connect to MQTT Broker
 client.connect(broker_address, broker_port)
 
-publisher = threading.Thread(target=publish_data, args=(state, sleeps_per_state, client))
+publisher = threading.Thread(target=publish_data, args=(sm.state, sleeps_per_state, client))
 publisher.start()
 
 # Start the MQTT client's network loop in a separate thread
