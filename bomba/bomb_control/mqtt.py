@@ -69,7 +69,7 @@ class MQTTController():
 
             cph2 = self.sm.state['current_ph2']
             payload = f'{{"value": {float(cph2)}, "timestamp": {int(time.time())}, "sensor_id": "bomb-current-ph2"}}'
-            self.client.publish("sensors/bomb/current_ph1", payload)
+            self.client.publish("sensors/bomb/current_ph2", payload)
 
             state = self.sm.state['sm_state']
             payload = f'{{"value": "{state}", "timestamp": {int(time.time())}, "sensor_id": "bomb-sm"}}'
@@ -80,7 +80,7 @@ class MQTTController():
             else:
                 bomb_status = "ON"
             payload = f'{{"value": "{bomb_status}", "timestamp": {int(time.time())}, "sensor_id": "bomb-relay"}}'
-            self.client.publish("sensors/bomb/relay", bomb_status)
+            self.client.publish("sensors/bomb/relay", payload)
 
             print(f"{datetime.now()} Publishing: {pressure} psi, {cph1} A, {cph2} B")
 
