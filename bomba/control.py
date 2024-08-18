@@ -33,7 +33,7 @@ if not ca_certs_path:
 bomba = BombaModelo()
 schd = BombScheduler()
 
-sm = ControlSM(bomba)
+sm = ControlSM(bomba, schd)
 sm.start()
 
 mqtt_contrl = MQTTController(broker_address,
