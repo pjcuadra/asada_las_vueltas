@@ -65,7 +65,7 @@ def on_message(client, userdata, msg):
 
         pprint(payload)
 
-        if payload['sensor_id'] in ["bomb-sm"]:
+        if payload['sensor_id'] in ["bomb-sm", "bomb-relay"]:
             point = Point(payload['sensor_id']) \
                 .tag("sensor_id", payload['sensor_id']) \
                 .field("value", payload['value']) \
