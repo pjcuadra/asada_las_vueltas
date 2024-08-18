@@ -28,19 +28,7 @@ if not username:
 if not ca_certs_path:
     raise ValueError("MQTT_CA_CERTS environment variable is required")
 
-
-try:
-    password = keyring.get_password("MQTT", username)
-    if password:
-        print("Password already stored.")
-    else:
-        password = input("Enter MQTT password: ")
-        keyring.set_password("MQTT", username, password)
-        print("Password stored successfully.")
-except keyring.errors.KeyringError as e:
-    print(f"Error accessing keyring: {e}")
-    raise e
-
+password = keyring.get_password("MQTT", username)
 
 # InfluxDB Client
 client = InfluxDBClient(url=influx_url, token=influx_token, org=influx_org)
