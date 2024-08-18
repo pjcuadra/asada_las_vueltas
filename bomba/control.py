@@ -30,7 +30,6 @@ password = keyring.get_password("MQTT", username)
 if not password:
     password = getpass()
     keyring.set_password("MQTT", username, password)
-    print(password)
 
 # Check if environment variables are set
 if not broker_address:

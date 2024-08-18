@@ -4,6 +4,7 @@ import os
 from influxdb_client import InfluxDBClient, Point
 from influxdb_client.client.write_api import SYNCHRONOUS
 import keyring
+from getpass import getpass
 
 # MQTT Configuration from Environment Variables
 broker_address = os.environ.get('MQTT_BROKER_ADDRESS')
@@ -29,6 +30,9 @@ if not ca_certs_path:
     raise ValueError("MQTT_CA_CERTS environment variable is required")
 
 password = keyring.get_password("MQTT", username)
+if not password:
+    password = getpass()
+    keyring.set_password("MQTT", username, password)
 
 # InfluxDB Client
 client = InfluxDBClient(url=influx_url, token=influx_token, org=influx_org)
