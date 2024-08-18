@@ -70,6 +70,12 @@ class MQTTController():
             payload = f'{{"value": {float(cph2)}, "timestamp": {int(time.time())}, "sensor_id": "bomb-current-ph2"}}'
             self.client.publish("sensors/bomb/current_ph1", payload)
 
+            if self.sm.state['sm_state'] in ['init', 'stop', 'stopped', 'stopping']:
+                bomb_status = "OFF"
+            else:
+                bomb_status = "ON"
+            self.client.publish("sensors/bomb/relay", bomb_status)
+
             print(f"{datetime.now()} Publishing: {pressure} psi, {cph1} A, {cph2} B")
 
             for i in range(sleeps_per_state[self.sm.state['sm_state']]):
