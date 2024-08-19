@@ -74,7 +74,7 @@ class BombScheduler():
         while True:
             now = datetime.now()
             if self.start_time is None:
-                time.sleep(5)
+                time.sleep(60)
                 self.check_cronjob_schedule(now)
                 continue
 
@@ -85,4 +85,4 @@ class BombScheduler():
             self.running_time = datetime.now() - self.start_time
             print(f'{datetime.now()} Run Time: {self.running_time}')
 
-            time.sleep(5)
+            time.sleep(60)
